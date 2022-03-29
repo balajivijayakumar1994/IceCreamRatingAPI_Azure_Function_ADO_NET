@@ -43,7 +43,7 @@ namespace IceCreamRatingAPI
 
             if (productAPIResponse.Result.StatusCode == HttpStatusCode.BadRequest)
             {
-                return new BadRequestErrorMessageResult("Enter Valid product Id");
+                return new BadRequestErrorMessageResult("Enter valid productId.");
             }
 
 
