@@ -36,7 +36,7 @@ namespace IceCreamRatingAPI
 
             if (userResponse.StatusCode == HttpStatusCode.BadRequest)
             {
-                return new BadRequestErrorMessageResult("Enter Valid UserId");
+                return new BadRequestErrorMessageResult("Enter valid userId");
             }
             var productAPI = "https://serverlessohapi.azurewebsites.net/api/GetProduct?productId=" + data.productId;
             var productAPIResponse = httpClient.GetAsync(productAPI);
@@ -49,7 +49,7 @@ namespace IceCreamRatingAPI
 
             if (data.rating < 0 || data.rating > 5)
             {
-                return new BadRequestErrorMessageResult("Enter Valid Rating");
+                return new BadRequestErrorMessageResult("Enter valid rating between 0 to 5");
             }
 
 
