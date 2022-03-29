@@ -49,7 +49,7 @@ namespace IceCreamRatingAPI
 
             if (data.rating < 0 || data.rating > 5)
             {
-                return new BadRequestErrorMessageResult("Enter valid rating between 0 to 5");
+                return new BadRequestErrorMessageResult("Enter valid rating between 0 to 5.");
             }
 
 
