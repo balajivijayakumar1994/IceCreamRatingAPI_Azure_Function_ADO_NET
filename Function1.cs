@@ -58,7 +58,7 @@ namespace IceCreamRatingAPI
             data.timestamp = DateTime.Now;
             var responseMessage = JsonConvert.SerializeObject(data);
 
-            var str = Environment.GetEnvironmentVariable("sqldb_connection");
+            var str = Environment.GetEnvironmentVariable("ConnectionString");
             using (SqlConnection conn = new SqlConnection(str))
             {
                 conn.Open();
@@ -96,7 +96,7 @@ namespace IceCreamRatingAPI
             }
 
             var jsonData = string.Empty;
-            var str = Environment.GetEnvironmentVariable("sqldb_connection");
+            var str = Environment.GetEnvironmentVariable("ConnectionString");
             using (SqlConnection conn = new SqlConnection(str))
             {
                 conn.Open();
@@ -141,7 +141,7 @@ namespace IceCreamRatingAPI
             }
 
             List<UserRating> resultlist = new List<UserRating>();
-            var str = Environment.GetEnvironmentVariable("sqldb_connection");
+            var str = Environment.GetEnvironmentVariable("ConnectionString");
             using (SqlConnection conn = new SqlConnection(str))
             {
                 conn.Open();
