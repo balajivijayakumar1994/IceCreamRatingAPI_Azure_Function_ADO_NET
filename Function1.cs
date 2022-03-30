@@ -36,7 +36,7 @@ namespace IceCreamRatingAPI
             }
             catch (Exception ex)
             {
-                log.LogInformation("Exception" + ex.Message + ex.InnerException.ToString());
+                log.LogInformation("Exception" + ex.Message + ex?.InnerException?.ToString());
             }
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
