@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -59,18 +60,26 @@ namespace IceCreamRatingAPI
             var responseMessage = JsonConvert.SerializeObject(data);
 
             var str = Environment.GetEnvironmentVariable("sqldb_connection");
-            using (SqlConnection conn = new SqlConnection(str))
+            using (SqlConnection connection = new SqlConnection(str))
             {
-                conn.Open();
-                var text = $"EXEC dbo.InsertRatingDetails '{data.id}','{responseMessage}'";
-
-                using (SqlCommand cmd = new SqlCommand(text, conn))
+                //Create the command object
+                SqlCommand cmd = new SqlCommand()
                 {
-                    // Execute the command and log the # rows affected.
-                    var rows = await cmd.ExecuteNonQueryAsync();
-                    log.LogInformation($"{rows} rows were updated");
-                }
+                    CommandText = "InsertRatingDetails",
+                    Connection = connection,
+                    CommandType = CommandType.StoredProcedure
+                };
+              
+                cmd.Parameters.AddWithValue("@ratingid", $"{data.id}");
+                cmd.Parameters.AddWithValue("@json", responseMessage);
+
+                connection.Open();
+                var rows = await cmd.ExecuteNonQueryAsync();
+                log.LogInformation($"{rows} rows were updated");
+
+
             }
+           
 
             return new OkObjectResult(responseMessage);
         }
