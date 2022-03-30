@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -25,19 +24,9 @@ namespace IceCreamRatingAPI
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            log.LogInformation("C# HTTP trigger function processed a request....");
 
-            try
-            {
-                KeyVaultService _service = new KeyVaultService();
-                //secret name applicationSecret2    
-                string secretValue = await _service.GetSecretValue("ConnectionString");
-                log.LogInformation("Secret value retrived via Secret Uri" + secretValue);
-            }
-            catch (Exception ex)
-            {
-                log.LogInformation("Exception" + ex.Message + ex?.InnerException?.ToString());
-            }
+
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             UserRating data = JsonConvert.DeserializeObject<UserRating>(requestBody);
@@ -47,20 +36,20 @@ namespace IceCreamRatingAPI
 
             if (userResponse.StatusCode == HttpStatusCode.BadRequest)
             {
-                return new BadRequestErrorMessageResult("Enter valid userId");
+                return new BadRequestErrorMessageResult("Enter Valid UserId");
             }
             var productAPI = "https://serverlessohapi.azurewebsites.net/api/GetProduct?productId=" + data.productId;
             var productAPIResponse = httpClient.GetAsync(productAPI);
 
             if (productAPIResponse.Result.StatusCode == HttpStatusCode.BadRequest)
             {
-                return new BadRequestErrorMessageResult("Enter valid productId..............");
+                return new BadRequestErrorMessageResult("Enter Valid product Id");
             }
 
 
             if (data.rating < 0 || data.rating > 5)
             {
-                return new BadRequestErrorMessageResult("Enter valid rating between 0 to 5.");
+                return new BadRequestErrorMessageResult("Enter Valid Rating");
             }
 
 
@@ -69,27 +58,19 @@ namespace IceCreamRatingAPI
             data.timestamp = DateTime.Now;
             var responseMessage = JsonConvert.SerializeObject(data);
 
-            var str = Environment.GetEnvironmentVariable("ConnectionString");
-            using (SqlConnection connection = new SqlConnection(str))
+            var str = Environment.GetEnvironmentVariable("sqldb_connection");
+            using (SqlConnection conn = new SqlConnection(str))
             {
-                //Create the command object
-                SqlCommand cmd = new SqlCommand()
+                conn.Open();
+                var text = $"EXEC dbo.InsertRatingDetails '{data.id}','{responseMessage}'";
+
+                using (SqlCommand cmd = new SqlCommand(text, conn))
                 {
-                    CommandText = "InsertRatingDetails",
-                    Connection = connection,
-                    CommandType = CommandType.StoredProcedure
-                };
-              
-                cmd.Parameters.AddWithValue("@ratingid", $"{data.id}");
-                cmd.Parameters.AddWithValue("@json", responseMessage);
-
-                connection.Open();
-                var rows = await cmd.ExecuteNonQueryAsync();
-                log.LogInformation($"{rows} rows were updated");
-
-
+                    // Execute the command and log the # rows affected.
+                    var rows = await cmd.ExecuteNonQueryAsync();
+                    log.LogInformation($"{rows} rows were updated");
+                }
             }
-           
 
             return new OkObjectResult(responseMessage);
         }
@@ -115,7 +96,7 @@ namespace IceCreamRatingAPI
             }
 
             var jsonData = string.Empty;
-            var str = Environment.GetEnvironmentVariable("ConnectionString");
+            var str = Environment.GetEnvironmentVariable("sqldb_connection");
             using (SqlConnection conn = new SqlConnection(str))
             {
                 conn.Open();
@@ -160,7 +141,7 @@ namespace IceCreamRatingAPI
             }
 
             List<UserRating> resultlist = new List<UserRating>();
-            var str = Environment.GetEnvironmentVariable("ConnectionString");
+            var str = Environment.GetEnvironmentVariable("sqldb_connection");
             using (SqlConnection conn = new SqlConnection(str))
             {
                 conn.Open();
